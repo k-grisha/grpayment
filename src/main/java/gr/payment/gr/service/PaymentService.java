@@ -1,6 +1,6 @@
 package gr.payment.gr.service;
 
-import gr.payment.gr.dto.PaymentDto;
+import gr.payment.gr.dto.TransferDto;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -14,11 +14,11 @@ public class PaymentService {
 		return map.get(account);
 	}
 
-	public void pay(PaymentDto paymentDto) {
-		BigDecimal from = map.get(paymentDto.from);
-		BigDecimal to = map.get(paymentDto.to);
-		from = from.subtract(paymentDto.value);
-		to = to.add(paymentDto.value);
+	public void pay(TransferDto transferDto) {
+		BigDecimal from = map.get(transferDto.from);
+		BigDecimal to = map.get(transferDto.to);
+		from = from.subtract(transferDto.value);
+		to = to.add(transferDto.value);
 
 	}
 
