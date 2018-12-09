@@ -1,6 +1,6 @@
 package gr.payment.gr.dao.impl;
 
-import gr.payment.gr.dao.AccountDao;
+import gr.payment.gr.dao.AccountRepository;
 import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
 
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AccountDaoMap implements AccountDao {
+public class AccountMapDao implements AccountRepository {
 	private Map<String, AccountEntity> map = new ConcurrentHashMap<>();
 
 	@Override

@@ -10,9 +10,6 @@ public class AccountEntity {
 	/** Текущий баланс */
 	private BigDecimal balance;
 
-	public AccountEntity() {
-	}
-
 	public AccountEntity(String uid, String ownerName, BigDecimal balance) {
 		this.uid = uid;
 		this.ownerName = ownerName;

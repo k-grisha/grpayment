@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Репозитарий для рбаты с Аккаунтами
  */
-public interface AccountDao {
+public interface AccountRepository {
 
 	// TODO постраничный запрос Аккаунтов
 
@@ -37,7 +37,8 @@ public interface AccountDao {
 
 	/**
 	 * Обновить баланс Аккаунта
-	 * @param iud Уникальный номер Аккаунта
+	 *
+	 * @param iud   Уникальный номер Аккаунта
 	 * @param value Новый баланс
 	 */
 	void updateBalance(String iud, BigDecimal value);
