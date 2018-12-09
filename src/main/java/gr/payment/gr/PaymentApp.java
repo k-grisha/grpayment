@@ -26,7 +26,7 @@ public class PaymentApp {
 		accountRepository.save(new AccountEntity("222", "Grisha", new BigDecimal("100.2")));
 		accountRepository.save(new AccountEntity("333", "Petr", new BigDecimal("100.3")));
 		final AccountService accountService = new AccountService(accountRepository);
-		AccountController accountController = new AccountController(accountService);
+		final AccountController accountController = new AccountController(accountService);
 
 		port(8090);
 		post(AccountController.PATH_TRANSFER, accountController.transfer());

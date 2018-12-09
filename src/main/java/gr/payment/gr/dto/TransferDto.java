@@ -7,13 +7,13 @@ import java.math.BigDecimal;
 public class TransferDto {
 	public final String from;
 	public final String to;
-	public final BigDecimal value;
+	public final BigDecimal amount;
 
 	public TransferDto(@JsonProperty("from") String from,
 					   @JsonProperty("to") String to,
-					   @JsonProperty("value") BigDecimal value) {
+					   @JsonProperty("amount") BigDecimal amount) {
 		this.from = from;
 		this.to = to;
-		this.value = value;
+		this.amount = amount;
 	}
 }

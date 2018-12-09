@@ -24,19 +24,21 @@ public class AccountService {
 	/**
 	 * Перевод денег между аккаунатми
 	 *
-	 * @param from  ID от кого перевод
-	 * @param to    ID кому перевод
-	 * @param value Объем перевода
+	 * @param from   ID от кого перевод
+	 * @param to     ID кому перевод
+	 * @param amount Объем перевода
 	 * @return ID транзакции
 	 */
-	public String transfer(String from, String to, BigDecimal value) {
-		LOGGER.info("Transfer request. from {} to {} value {}", from, to, value);
-		//todo value провалидировать
+	public String transfer(String from, String to, BigDecimal amount) {
+		LOGGER.info("Transfer request. from {} to {} amount {}", from, to, amount);
+		if (amount.compareTo(BigDecimal.ZERO) < 0) {
+			throw new PaymentException("Transfer amount can not be less than zero");
+		}
 		AccountEntity fromAccount = accountRepository.findByUid(from);
 		if (fromAccount == null) {
 			throw new PaymentException("Account with id=" + from + " is not found");
 		}
-		if (fromAccount.getBalance().compareTo(value) < 0) {
+		if (fromAccount.getBalance().compareTo(amount) < 0) {
 			throw new PaymentException("Account with id=" + from + " doesn't have enough money");
 		}
 		AccountEntity toAccount = accountRepository.findByUid(to);
@@ -44,9 +46,9 @@ public class AccountService {
 			throw new PaymentException("Account with id=" + to + " is not found");
 		}
 
-		accountRepository.updateBalance(fromAccount.getUid(), fromAccount.getBalance().subtract(value));
-		accountRepository.updateBalance(toAccount.getUid(), toAccount.getBalance().add(value));
-		LOGGER.info("Transfer is finished. from {} to {} value {}", from, to, value);
+		accountRepository.updateBalance(fromAccount.getUid(), fromAccount.getBalance().subtract(amount));
+		accountRepository.updateBalance(toAccount.getUid(), toAccount.getBalance().add(amount));
+		LOGGER.info("Transfer is finished. from {} to {} amount {}", from, to, amount);
 		// todo Сохранить данные таранзакции в соотв. сервисе, желательно асинхронно.
 		return UUID.randomUUID().toString();
 	}
@@ -61,7 +63,7 @@ public class AccountService {
 	/**
 	 * Поиск Аккаунта по номеру
 	 */
-	public AccountEntity getBy(String uid) {
+	public AccountEntity getByUid(String uid) {
 		return accountRepository.findByUid(uid);
 	}
 

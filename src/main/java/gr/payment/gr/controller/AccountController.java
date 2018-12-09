@@ -38,7 +38,7 @@ public class AccountController {
 
 	public Route getByUid() {
 		return (request, response) -> {
-			AccountEntity account = accountService.getBy(request.params(UID_ACCOUNT));
+			AccountEntity account = accountService.getByUid(request.params(UID_ACCOUNT));
 			if (account == null) {
 				return null;
 			}
@@ -50,7 +50,7 @@ public class AccountController {
 	public Route transfer() {
 		return (request, response) -> {
 			TransferDto transferDto = MAPPER.readValue(request.body(), TransferDto.class);
-			String transferId = accountService.transfer(transferDto.from, transferDto.to, transferDto.value);
+			String transferId = accountService.transfer(transferDto.from, transferDto.to, transferDto.amount);
 			return MAPPER.writeValueAsString(transferId);
 		};
 	}
