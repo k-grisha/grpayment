@@ -8,7 +8,7 @@ public class AccountEntity {
 	/** Имя владельца */
 	private String ownerName;
 	/** Текущий баланс */
-	private BigDecimal balance;
+	volatile private BigDecimal balance;
 
 	public AccountEntity(String uid, String ownerName, BigDecimal balance) {
 		this.uid = uid;

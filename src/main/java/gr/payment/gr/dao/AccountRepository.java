@@ -42,4 +42,6 @@ public interface AccountRepository {
 	 * @param value Новый баланс
 	 */
 	void updateBalance(String iud, BigDecimal value);
+
+	void increaseBalance(String iud, BigDecimal value);
 }

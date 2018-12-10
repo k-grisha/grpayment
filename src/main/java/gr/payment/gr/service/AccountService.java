@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,11 @@ public class AccountService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
 	private final AccountRepository accountRepository;
 
+	/** Мониторы для сегментной синхронизации */
+	private final Object[] locks = new Object[8];
+
 	public AccountService(AccountRepository accountRepository) {
+		Arrays.setAll(locks, i -> new Object());
 		this.accountRepository = accountRepository;
 	}
 
@@ -30,25 +35,36 @@ public class AccountService {
 	 * @return ID транзакции
 	 */
 	public String transfer(String from, String to, BigDecimal amount) {
-		LOGGER.info("Transfer request. from {} to {} amount {}", from, to, amount);
+//		LOGGER.info("Transfer request. from {} to {} amount {}", from, to, amount);
 		if (amount.compareTo(BigDecimal.ZERO) < 0) {
 			throw new PaymentException("Transfer amount can not be less than zero");
 		}
-		AccountEntity fromAccount = accountRepository.findByUid(from);
-		if (fromAccount == null) {
-			throw new PaymentException("Account with id=" + from + " is not found");
-		}
-		if (fromAccount.getBalance().compareTo(amount) < 0) {
-			throw new PaymentException("Account with id=" + from + " doesn't have enough money");
-		}
-		AccountEntity toAccount = accountRepository.findByUid(to);
-		if (toAccount == null) {
-			throw new PaymentException("Account with id=" + to + " is not found");
-		}
 
-		accountRepository.updateBalance(fromAccount.getUid(), fromAccount.getBalance().subtract(amount));
-		accountRepository.updateBalance(toAccount.getUid(), toAccount.getBalance().add(amount));
-		LOGGER.info("Transfer is finished. from {} to {} amount {}", from, to, amount);
+		//todo монитор только по from череват тем что деньг получателю, пришедшие от разных отправителей, могут быть перезаписаны
+		synchronized (locks[from.hashCode() % locks.length]) {
+			AccountEntity fromAccount = accountRepository.findByUid(from);
+			if (fromAccount == null) {
+				throw new PaymentException("Account with id=" + from + " is not found");
+			}
+			AccountEntity toAccount = accountRepository.findByUid(to);
+			if (toAccount == null) {
+				throw new PaymentException("Account with id=" + to + " is not found");
+			}
+
+			if (fromAccount.getBalance().compareTo(amount) < 0) {
+				throw new PaymentException("Account with id=" + from + " doesn't have enough money");
+			}
+
+			// todo транзакционно
+			accountRepository.updateBalance(fromAccount.getUid(), fromAccount.getBalance().subtract(amount));
+			accountRepository.updateBalance(toAccount.getUid(), toAccount.getBalance().add(amount));
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+		}
+//		LOGGER.info("Transfer is finished. from {} to {} amount {}", from, to, amount);
 		// todo Сохранить данные таранзакции в соотв. сервисе, желательно асинхронно.
 		return UUID.randomUUID().toString();
 	}
