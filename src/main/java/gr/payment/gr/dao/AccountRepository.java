@@ -34,7 +34,6 @@ public interface AccountRepository {
 	 */
 	void save(AccountEntity accountEntity);
 
-
 	/**
 	 * Обновить баланс Аккаунта
 	 *
