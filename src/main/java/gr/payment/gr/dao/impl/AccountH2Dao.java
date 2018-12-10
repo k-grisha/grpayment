@@ -8,10 +8,7 @@ import org.jooq.Configuration;
 import org.jooq.ConnectionProvider;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
-import org.jooq.impl.DataSourceConnectionProvider;
-import org.jooq.impl.DefaultConfiguration;
-import org.jooq.impl.ThreadLocalTransactionProvider;
+import org.jooq.impl.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -24,6 +21,11 @@ import static gr.payment.gr.db.Tables.ACCOUNT;
 public class AccountH2Dao implements AccountRepository {
 
 	final DSLContext ctx;
+	final DefaultTransactionProvider transactionProvider;
+
+	public DefaultTransactionProvider getTransactionProvider() {
+		return transactionProvider;
+	}
 
 	public AccountH2Dao() {
 		final BasicDataSource ds = new BasicDataSource();
@@ -46,6 +48,8 @@ public class AccountH2Dao implements AccountRepository {
 				.set(new ThreadLocalTransactionProvider(cp, true));
 		ctx = DSL.using(configuration);
 		ctx.createTable(ACCOUNT);
+		transactionProvider = new DefaultTransactionProvider(cp);
+
 	}
 
 	@Override
@@ -88,6 +92,11 @@ public class AccountH2Dao implements AccountRepository {
 				account.update();
 			}
 		});
+	}
+
+	@Override
+	public void transfer(String from, String to, BigDecimal amount) {
+
 	}
 
 

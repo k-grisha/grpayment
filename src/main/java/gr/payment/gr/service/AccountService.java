@@ -1,8 +1,10 @@
 package gr.payment.gr.service;
 
 import gr.payment.gr.dao.AccountRepository;
+import gr.payment.gr.dao.impl.AccountH2Dao;
 import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
+import org.jooq.impl.DefaultTransactionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,8 @@ public class AccountService {
 		Arrays.setAll(locks, i -> new Object());
 		this.accountRepository = accountRepository;
 	}
+
+
 
 	/**
 	 * Перевод денег между аккаунатми

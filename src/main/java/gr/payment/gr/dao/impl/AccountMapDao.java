@@ -37,4 +37,9 @@ public class AccountMapDao implements AccountRepository {
 		account.setBalance(value);
 	}
 
+	@Override
+	public void transfer(String from, String to, BigDecimal amount) {
+
+	}
+
 }
