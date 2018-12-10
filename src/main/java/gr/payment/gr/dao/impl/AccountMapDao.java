@@ -37,10 +37,4 @@ public class AccountMapDao implements AccountRepository {
 		account.setBalance(value);
 	}
 
-	@Override
-	public void increaseBalance(String iud, BigDecimal value) {
-		AccountEntity account = map.get(iud);
-//		account
-	}
-
 }
