@@ -93,6 +93,9 @@
 
     <build>
 
+        <!-- The resources element will replace available properties in all matching
+             resources. We use this to provide H2 connection configuration to various
+             configuration elements -->
         <resources>
             <resource>
                 <filtering>true</filtering>
@@ -110,11 +113,31 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
+                    <fork>true</fork>
+                    <maxmem>1024m</maxmem>
+                    <meminitial>256m</meminitial>
+                    <encoding>UTF-8</encoding>
+                    <!-- [java-9] -->
+                    <!--<release>10</release>-->
+                    <!-- [/java-9] -->
+
+                    <!-- IntelliJ needs these https://youtrack.jetbrains.com/issue/IDEA-195472 -->
                     <source>1.8</source>
                     <target>1.8</target>
+
+                    <debug>true</debug>
+                    <debuglevel>lines,vars,source</debuglevel>
+                    <!-- [#2413] Make compiler warnings a bit more visible
+                         But don't fail (yet) -->
+                    <compilerArgs>
+                        <arg>-Xlint:varargs</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
+            <!-- We're using the properties plugin to load external properties into Maven.
+                 See this excellent blog post for an explanation:
+                 http://www.petrikainulainen.net/programming/tips-and-tricks/creating-profile-specific-configuration-files-with-maven/ -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
@@ -141,7 +164,7 @@
                 <version>1.5</version>
 
                 <configuration>
-                    <!--<skip>${maven.test.skip}</skip>-->
+                    <skip>${maven.test.skip}</skip>
                     <forkMode>always</forkMode>
                 </configuration>
 
@@ -203,7 +226,7 @@
                                     <generatedAnnotation>false</generatedAnnotation>
                                 </generate>
                                 <target>
-                                    <packageName>org.jooq.example.db.h2</packageName>
+                                    <packageName>gr.payment.gr.db</packageName>
                                     <directory>target/generated-sources/jooq-h2</directory>
                                 </target>
                             </generator>
@@ -212,6 +235,24 @@
                 </executions>
             </plugin>
 
+            <!-- Run the JavaFX application right after building -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>run-example</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>gr.payment.gr.PaymentApp</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

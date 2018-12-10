@@ -3,6 +3,7 @@ package gr.payment.gr;
 
 import gr.payment.gr.controller.AccountController;
 import gr.payment.gr.dao.AccountRepository;
+import gr.payment.gr.dao.impl.AccountH2Dao;
 import gr.payment.gr.dao.impl.AccountMapDao;
 import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
@@ -21,12 +22,18 @@ public class PaymentApp {
 
 	public static void main(String[] args) {
 		// Приложение маленькое, не используем никаких DI контейнеров, все соибраем руками.
+
+		AccountH2Dao jooqDao = new AccountH2Dao();
+		jooqDao.save(new AccountEntity("111", "Ivan", new BigDecimal("100.1")));
+		jooqDao.save(new AccountEntity("222", "Grisha", new BigDecimal("100.2")));
+
 		final AccountRepository accountRepository = new AccountMapDao();
 		accountRepository.save(new AccountEntity("111", "Ivan", new BigDecimal("100.1")));
 		accountRepository.save(new AccountEntity("222", "Grisha", new BigDecimal("100.2")));
 		accountRepository.save(new AccountEntity("333", "Petr", new BigDecimal("100.3")));
-		final AccountService accountService = new AccountService(accountRepository);
+		final AccountService accountService = new AccountService(jooqDao);
 		final AccountController accountController = new AccountController(accountService);
+
 
 		port(8090);
 		post(AccountController.PATH_TRANSFER, accountController.transfer());

@@ -40,7 +40,7 @@ public class AccountController {
 		return (request, response) -> {
 			AccountEntity account = accountService.getByUid(request.params(UID_ACCOUNT));
 			if (account == null) {
-				return null;
+				return MAPPER.writeValueAsString(null);
 			}
 			AccountDto accountDto = new AccountDto(account.getUid(), account.getOwnerName(), account.getBalance());
 			return MAPPER.writeValueAsString(accountDto);
