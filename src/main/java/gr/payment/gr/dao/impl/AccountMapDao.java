@@ -29,15 +29,6 @@ public class AccountMapDao implements AccountRepository {
 	}
 
 	@Override
-	public void updateBalance(String iud, BigDecimal value) {
-		AccountEntity account = map.get(iud);
-		if (account == null) {
-			throw new PaymentException("Account with uid=" + iud + " not found");
-		}
-		account.setBalance(value);
-	}
-
-	@Override
 	public void transfer(String from, String to, BigDecimal amount) {
 
 	}

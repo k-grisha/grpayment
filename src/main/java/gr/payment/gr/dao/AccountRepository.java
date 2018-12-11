@@ -35,12 +35,11 @@ public interface AccountRepository {
 	void save(AccountEntity accountEntity);
 
 	/**
-	 * Обновить баланс Аккаунта
+	 * Money transfer
 	 *
-	 * @param iud   Уникальный номер Аккаунта
-	 * @param value Новый баланс
+	 * @param from
+	 * @param to
+	 * @param amount
 	 */
-	void updateBalance(String iud, BigDecimal value);
-
 	void transfer(String from, String to, BigDecimal amount);
 }

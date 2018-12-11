@@ -1,6 +1,7 @@
 package gr.payment.gr.service;
 
 import gr.payment.gr.dao.AccountRepository;
+import gr.payment.gr.dao.impl.AccountH2Dao;
 import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
 import org.junit.Assert;
@@ -8,24 +9,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 
 public class AccountServiceTest {
 
-	private AccountRepository accountRepository = Mockito.mock(AccountRepository.class);
-	private Map<String, AccountEntity> entityMap = new ConcurrentHashMap<>();
+	private AccountRepository accountRepository = new AccountH2Dao();
 	private AccountService accountService;
 	@Rule
 	public ExpectedException expectedEx = ExpectedException.none();
@@ -34,30 +24,18 @@ public class AccountServiceTest {
 	public void before() {
 		AccountEntity accountA = new AccountEntity("111", "AAA", new BigDecimal("100.0"));
 		AccountEntity accountB = new AccountEntity("222", "BBB", new BigDecimal("100.0"));
-		entityMap.put(accountA.getUid(), accountA);
-		entityMap.put(accountB.getUid(), accountB);
-
-		when(accountRepository.findAll()).thenReturn(new ArrayList<>(entityMap.values()));
-		when(accountRepository.findByUid(anyString()))
-				.thenAnswer(invocation -> entityMap.get(invocation.getArgumentAt(0, String.class)));
-		doAnswer((Answer<Void>) invocation -> {
-			AccountEntity entity = entityMap.get(invocation.getArgumentAt(0, String.class));
-			entity.setBalance(invocation.getArgumentAt(1, BigDecimal.class));
-			return null;
-		}).when(accountRepository).updateBalance(anyString(), any(BigDecimal.class));
-
+		accountRepository.save(accountA);
+		accountRepository.save(accountB);
 		accountService = new AccountService(accountRepository);
 	}
 
 	@Test
 	public void transfer_success() {
-		Assert.assertEquals(new BigDecimal("100.0"), accountService.getByUid("111").getBalance());
-		Assert.assertEquals(new BigDecimal("100.0"), accountService.getByUid("222").getBalance());
-
+		Assert.assertTrue(accountService.getByUid("111").getBalance().compareTo(new BigDecimal("100.0")) == 0);
+		Assert.assertTrue(accountService.getByUid("222").getBalance().compareTo(new BigDecimal("100.0")) == 0);
 		accountService.transfer("111", "222", new BigDecimal("10"));
-
-		Assert.assertEquals(new BigDecimal("90.0"), accountService.getByUid("111").getBalance());
-		Assert.assertEquals(new BigDecimal("110.0"), accountService.getByUid("222").getBalance());
+		Assert.assertTrue(accountService.getByUid("111").getBalance().compareTo(new BigDecimal("90.0")) == 0);
+		Assert.assertTrue(accountService.getByUid("222").getBalance().compareTo(new BigDecimal("110.0")) == 0);
 	}
 
 	@Test

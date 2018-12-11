@@ -2,16 +2,19 @@ package gr.payment.gr.dao.impl;
 
 import gr.payment.gr.dao.AccountRepository;
 import gr.payment.gr.db.tables.records.AccountRecord;
+import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.jooq.Configuration;
-import org.jooq.ConnectionProvider;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.*;
+import org.jooq.*;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DataSourceConnectionProvider;
+import org.jooq.impl.DefaultConfiguration;
+import org.jooq.impl.ThreadLocalTransactionProvider;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -21,11 +24,6 @@ import static gr.payment.gr.db.Tables.ACCOUNT;
 public class AccountH2Dao implements AccountRepository {
 
 	final DSLContext ctx;
-	final DefaultTransactionProvider transactionProvider;
-
-	public DefaultTransactionProvider getTransactionProvider() {
-		return transactionProvider;
-	}
 
 	public AccountH2Dao() {
 		final BasicDataSource ds = new BasicDataSource();
@@ -45,11 +43,11 @@ public class AccountH2Dao implements AccountRepository {
 		final Configuration configuration = new DefaultConfiguration()
 				.set(cp)
 				.set(SQLDialect.H2)
+//				.set(new Settings().withExecuteWithOptimisticLocking(true))
 				.set(new ThreadLocalTransactionProvider(cp, true));
 		ctx = DSL.using(configuration);
 		ctx.createTable(ACCOUNT);
-		transactionProvider = new DefaultTransactionProvider(cp);
-
+		Arrays.setAll(locks, i -> new Object());
 	}
 
 	@Override
@@ -83,21 +81,57 @@ public class AccountH2Dao implements AccountRepository {
 		});
 	}
 
-	@Override
-	public void updateBalance(String iud, BigDecimal value) {
-		ctx.transaction(() -> {
-			AccountRecord account = ctx.fetchOne(ACCOUNT, ACCOUNT.UID.eq(iud));
-			if (account != null) {
-				account.setBalance(value);
-				account.update();
-			}
-		});
-	}
+	private final Object[] locks = new Object[16];
 
 	@Override
 	public void transfer(String from, String to, BigDecimal amount) {
+		ctx.transaction(() -> {
+			Result<AccountRecord> accounts = ctx.fetch(ACCOUNT, ACCOUNT.UID.in(from, to));
+
+			if (accounts == null || accounts.isEmpty() || accounts.size() != 2) {
+				throw new PaymentException("Accounts " + from + " and/or " + to + " not found");
+			}
+			AccountRecord fromAccount = accounts.stream()
+					.filter(a -> a.getUid().equals(from)).findFirst()
+					.orElseThrow(() -> new PaymentException("Account " + from + " not found"));
+			AccountRecord toAccount = accounts.stream()
+					.filter(a -> a.getUid().equals(to)).findFirst()
+					.orElseThrow(() -> new PaymentException("Account " + to + " not found"));
+			if (fromAccount.getBalance().compareTo(amount) < 0) {
+				throw new PaymentException("Account with id=" + from + " doesn't have enough money");
+			}
+			fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+			toAccount.setBalance(toAccount.getBalance().add(amount));
+			ctx.batchStore(accounts);
+		});
+	}
+
+	private void validateAccounts(String from, String to, Result<AccountRecord> accounts) {
 
 	}
+
+
+//	@Override
+//	public void transfer(String from, String to, BigDecimal amount) {
+//		ctx.transaction(() -> {
+//			AccountRecord fromAccount = ctx.fetchOne(ACCOUNT, ACCOUNT.UID.eq(from));
+//			if (fromAccount == null) {
+//				throw new PaymentException("Account with id=" + from + " is not found");
+//			}
+//			if (fromAccount.getBalance().compareTo(amount) < 0) {
+//				throw new PaymentException("Account with id=" + from + " doesn't have enough money");
+//			}
+//			fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+//			fromAccount.store();
+//			AccountRecord toAccount = ctx.fetchOne(ACCOUNT, ACCOUNT.UID.eq(to));
+//			if (toAccount == null) {
+//				throw new PaymentException("Account with id=" + to + " is not found");
+//			}
+//			toAccount.setBalance(toAccount.getBalance().add(amount));
+//			toAccount.store();
+//
+//		});
+//	}
 
 
 }
