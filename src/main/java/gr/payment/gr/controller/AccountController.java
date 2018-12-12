@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.payment.gr.dto.AccountDto;
 import gr.payment.gr.dto.TransferDto;
 import gr.payment.gr.model.AccountEntity;
+import gr.payment.gr.model.TransferEntity;
 import gr.payment.gr.service.AccountService;
 import spark.Request;
 import spark.Response;
@@ -50,7 +51,7 @@ public class AccountController {
 	public Route transfer() {
 		return (request, response) -> {
 			TransferDto transferDto = MAPPER.readValue(request.body(), TransferDto.class);
-			String transferId = accountService.transfer(transferDto.from, transferDto.to, transferDto.amount);
+			String transferId = accountService.transfer(new TransferEntity(transferDto.from, transferDto.to, transferDto.amount));
 			return MAPPER.writeValueAsString(transferId);
 		};
 	}
