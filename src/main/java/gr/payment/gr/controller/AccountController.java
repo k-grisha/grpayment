@@ -6,6 +6,7 @@ import gr.payment.gr.dto.TransferDto;
 import gr.payment.gr.model.AccountEntity;
 import gr.payment.gr.model.TransferEntity;
 import gr.payment.gr.service.AccountService;
+import gr.payment.gr.service.TransferService;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -23,9 +24,11 @@ public class AccountController {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	private final AccountService accountService;
+	private final TransferService transferService;
 
-	public AccountController(AccountService accountService) {
+	public AccountController(AccountService accountService, TransferService transferService) {
 		this.accountService = accountService;
+		this.transferService = transferService;
 	}
 
 	public Route getAll() {
@@ -51,7 +54,7 @@ public class AccountController {
 	public Route transfer() {
 		return (request, response) -> {
 			TransferDto transferDto = MAPPER.readValue(request.body(), TransferDto.class);
-			String transferId = accountService.transfer(new TransferEntity(transferDto.from, transferDto.to, transferDto.amount));
+			String transferId = transferService.transfer(new TransferEntity(transferDto.from, transferDto.to, transferDto.amount));
 			return MAPPER.writeValueAsString(transferId);
 		};
 	}

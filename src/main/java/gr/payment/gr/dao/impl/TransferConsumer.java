@@ -13,6 +13,8 @@ public class TransferConsumer extends Thread {
 	private final Queue<TransferEntity> queue;
 	private final AccountRepository accountRepository;
 
+	private boolean running = true;
+
 	public TransferConsumer(Queue<TransferEntity> queue, AccountRepository accountRepository) {
 		this.queue = queue;
 		this.accountRepository = accountRepository;
@@ -20,23 +22,28 @@ public class TransferConsumer extends Thread {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (running) {
 			while (queue.size() != 0) {
 				TransferEntity transferEntity = queue.poll();
 				try {
 					accountRepository.transfer(transferEntity.getFrom(), transferEntity.getTo(), transferEntity.getAmount());
 				} catch (Exception e) {
-					queue.add(transferEntity);
 					// todo logg
 					e.printStackTrace();
 				}
 			}
+			if (!running){
+				break;
+			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
 		}
+	}
+
+	public void stopConsume() {
+		this.running = false;
 	}
 }
