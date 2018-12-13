@@ -29,8 +29,8 @@ public class PaymentApp {
 	public static void main(String[] args) {
 		// Приложение маленькое, не используем никаких DI контейнеров, все соибраем руками.
 		AccountRepository accountRepository = new AccountDao(DaoUtil.buildAccountContext());
-		accountRepository.save(new AccountEntity("111", "Ivan", new BigDecimal("100.1")));
-		accountRepository.save(new AccountEntity("222", "Grisha", new BigDecimal("100.2")));
+		accountRepository.save(new AccountEntity("111", "Ivan", new BigDecimal("100")));
+		accountRepository.save(new AccountEntity("222", "Grisha", new BigDecimal("200")));
 		Queue<TransferEntity> queue = new ArrayBlockingQueue<>(10000);
 		TransferRepository transferRepository = new TransferProducer(queue);
 		TransferService transferService = new TransferService(accountRepository, transferRepository);
@@ -38,7 +38,7 @@ public class PaymentApp {
 		AccountController accountController = new AccountController(accountService, transferService);
 		new TransferConsumer(queue, accountRepository).start();
 
-		port(8090);
+		port(8080);
 		post(AccountController.PATH_TRANSFER, accountController.transfer());
 		get(AccountController.PATH_ACCOUNTS, accountController.getAll());
 		get(AccountController.PATH_ACCOUNT_UID, accountController.getByUid());
