@@ -14,6 +14,9 @@ import spark.Route;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Routing
+ */
 public class AccountController {
 	private static final String PATH_PREFIX = "/rest/v1/";
 	public static final String PATH_ACCOUNTS = PATH_PREFIX + "accounts/";

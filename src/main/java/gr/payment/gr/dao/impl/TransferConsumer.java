@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Queue;
 
 /**
- * daemon
+ * Daemon transfer consumer
  */
 public class TransferConsumer extends Thread {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransferConsumer.class);
@@ -32,8 +32,7 @@ public class TransferConsumer extends Thread {
 					accountRepository.transfer(transferEntity.getFrom(), transferEntity.getTo(), transferEntity.getAmount());
 					LOGGER.info("Transfer {} completed", transferEntity.getUid());
 				} catch (Exception e) {
-					// todo logg
-					e.printStackTrace();
+					LOGGER.error("Unable to finish transfer " + transferEntity.getUid(), e);
 				}
 			}
 			if (!running) {

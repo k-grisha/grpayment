@@ -6,10 +6,15 @@
     <groupId>gr.payment</groupId>
     <artifactId>gr-payment</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <com.google.code.gson>2.8.5</com.google.code.gson>
+        <com.sparkjava>2.8.0</com.sparkjava>
+        <ch.qos.logback>1.2.3</ch.qos.logback>
+        <com.fasterxml.jackson.core>2.9.7</com.fasterxml.jackson.core>
+        <junit>4.12</junit>
+        <org.mockito>1.10.19</org.mockito>
         <org.h2.version>1.4.197</org.h2.version>
         <org.jooq.version>3.11.7</org.jooq.version>
     </properties>
@@ -31,45 +36,33 @@
         <dependency>
             <groupId>com.sparkjava</groupId>
             <artifactId>spark-core</artifactId>
-            <version>2.8.0</version>
+            <version>${com.sparkjava}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>${ch.qos.logback}</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${com.google.code.gson}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.7</version>
+            <version>${com.fasterxml.jackson.core}</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <version>${org.mockito}</version>
             <scope>test</scope>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.mockito</groupId>-->
-            <!--<artifactId>mockito-core</artifactId>-->
-            <!--<version>2.23.4</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>com.despegar</groupId>
             <artifactId>spark-test</artifactId>
@@ -98,10 +91,6 @@
     </dependencies>
 
     <build>
-
-        <!-- The resources element will replace available properties in all matching
-             resources. We use this to provide H2 connection configuration to various
-             configuration elements -->
         <resources>
             <resource>
                 <filtering>true</filtering>
@@ -123,27 +112,12 @@
                     <maxmem>1024m</maxmem>
                     <meminitial>256m</meminitial>
                     <encoding>UTF-8</encoding>
-                    <!-- [java-9] -->
-                    <!--<release>10</release>-->
-                    <!-- [/java-9] -->
-
-                    <!-- IntelliJ needs these https://youtrack.jetbrains.com/issue/IDEA-195472 -->
                     <source>1.8</source>
                     <target>1.8</target>
-
                     <debug>true</debug>
-                    <debuglevel>lines,vars,source</debuglevel>
-                    <!-- [#2413] Make compiler warnings a bit more visible
-                         But don't fail (yet) -->
-                    <compilerArgs>
-                        <arg>-Xlint:varargs</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
 
-            <!-- We're using the properties plugin to load external properties into Maven.
-                 See this excellent blog post for an explanation:
-                 http://www.petrikainulainen.net/programming/tips-and-tricks/creating-profile-specific-configuration-files-with-maven/ -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
@@ -169,11 +143,6 @@
                 <artifactId>sql-maven-plugin</artifactId>
                 <version>1.5</version>
 
-                <configuration>
-                    <skip>${maven.test.skip}</skip>
-                    <forkMode>always</forkMode>
-                </configuration>
-
                 <executions>
                     <execution>
                         <id>create-database-postgres</id>
@@ -183,7 +152,7 @@
                         </goals>
                         <configuration>
                             <driver>${db.driver}</driver>
-                            <url>${db.url}</url>
+                            <url>${db.local.url}</url>
                             <username>${db.username}</username>
                             <password>${db.password}</password>
 
@@ -220,7 +189,7 @@
                         <configuration>
                             <jdbc>
                                 <driver>${db.driver}</driver>
-                                <url>${db.url}</url>
+                                <url>${db.local.url}</url>
                                 <user>${db.username}</user>
                                 <password>${db.password}</password>
                             </jdbc>
@@ -241,24 +210,33 @@
                 </executions>
             </plugin>
 
-            <!-- Run the JavaFX application right after building -->
+
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>run-example</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
-                            <goal>java</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
-                            <mainClass>gr.payment.gr.PaymentApp</mainClass>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        gr.payment.gr.PaymentApp
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

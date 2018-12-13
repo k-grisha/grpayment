@@ -1,6 +1,5 @@
 package gr.payment.gr;
 
-import ch.qos.logback.core.util.TimeUtil;
 import com.despegar.http.client.GetMethod;
 import com.despegar.http.client.HttpResponse;
 import com.despegar.http.client.PostMethod;
@@ -11,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.payment.gr.controller.AccountController;
 import gr.payment.gr.dto.AccountDto;
 import gr.payment.gr.dto.TransferDto;
-import gr.payment.gr.service.AccountConcurrentTest;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -97,11 +95,11 @@ public class IntegrationTest {
 
 
 		for (int i = 0; i < 50; i++) {
-			PayThread pt1 = new PayThread( "111", "222", BigDecimal.ONE);
+			PayThread pt1 = new PayThread("111", "222", BigDecimal.ONE);
 			pt1.start();
-			PayThread pt2 = new PayThread( "222", "111", BigDecimal.ONE);
+			PayThread pt2 = new PayThread("222", "111", BigDecimal.ONE);
 			pt2.start();
-			PayThread pt3 = new PayThread( "333", "111", BigDecimal.ONE);
+			PayThread pt3 = new PayThread("333", "111", BigDecimal.ONE);
 			pt3.start();
 		}
 
@@ -111,9 +109,9 @@ public class IntegrationTest {
 		AccountDto accountB = get(AccountController.PATH_ACCOUNTS + "222", AccountDto.class);
 		AccountDto accountC = get(AccountController.PATH_ACCOUNTS + "333", AccountDto.class);
 //		AccountDto accountD = get(AccountController.PATH_ACCOUNTS + "444", AccountDto.class);
-		Assert.assertTrue(accountA.balance.compareTo(new BigDecimal("12500.0"))==0);
-		Assert.assertTrue(accountB.balance.compareTo(new BigDecimal("10000.0"))==0);
-		Assert.assertTrue(accountC.balance.compareTo(new BigDecimal("7500.0"))==0);
+		Assert.assertTrue(accountA.balance.compareTo(new BigDecimal("12500.0")) == 0);
+		Assert.assertTrue(accountB.balance.compareTo(new BigDecimal("10000.0")) == 0);
+		Assert.assertTrue(accountC.balance.compareTo(new BigDecimal("7500.0")) == 0);
 //		Assert.assertTrue(accountD.balance.compareTo(new BigDecimal("7500.0"))==0);
 		System.out.println(accountA);
 
@@ -141,7 +139,7 @@ public class IntegrationTest {
 	final class PayThread extends Thread {
 		private String json;
 
-		public PayThread(String from, String to, BigDecimal amount){
+		public PayThread(String from, String to, BigDecimal amount) {
 			try {
 				json = MAPPER.writeValueAsString(new TransferDto(from, to, amount));
 			} catch (JsonProcessingException e) {

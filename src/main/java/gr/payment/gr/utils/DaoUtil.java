@@ -1,6 +1,7 @@
 package gr.payment.gr.utils;
 
 import gr.payment.gr.dao.impl.AccountDao;
+import gr.payment.gr.exceprion.PaymentException;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jooq.Configuration;
 import org.jooq.ConnectionProvider;
@@ -20,14 +21,14 @@ import static org.jooq.impl.DSL.constraint;
 
 public class DaoUtil {
 
+	/** Build DataSource context */
 	public static DSLContext buildAccountContext() {
 		final BasicDataSource ds = new BasicDataSource();
 		final Properties properties = new Properties();
 		try {
 			properties.load(AccountDao.class.getResourceAsStream("/config.properties"));
 		} catch (IOException e) {
-			// todo
-			e.printStackTrace();
+			throw new PaymentException("Load property error", e);
 		}
 
 		ds.setDriverClassName(properties.getProperty("db.driver"));

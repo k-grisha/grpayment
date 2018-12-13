@@ -6,40 +6,38 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Репозитарий для рбаты с Аккаунтами
+ * Accounts repository
  */
 public interface AccountRepository {
 
-	// TODO постраничный запрос Аккаунтов
-
 	/**
-	 * Получить все Аккаунты
+	 * Get all accounts
 	 *
-	 * @return Список всех Аккаунтов или пустой список
+	 * @return List of accounts or empty list
 	 */
 	List<AccountEntity> findAll();
 
 	/**
-	 * Поиск Аккаунта по номеру
+	 * Find account by uuid
 	 *
-	 * @param uid уникальный номер
-	 * @return Аккаунт или Null
+	 * @param uid uid of account
+	 * @return account or null
 	 */
 	AccountEntity findByUid(String uid);
 
 	/**
-	 * Сохранить новый аккаунт
+	 * Save account
 	 *
-	 * @param accountEntity Новый Аккаунт
+	 * @param accountEntity account for save
 	 */
 	void save(AccountEntity accountEntity);
 
 	/**
 	 * Money transfer
 	 *
-	 * @param from
-	 * @param to
-	 * @param amount
+	 * @param from uid of sender
+	 * @param to uid of recipient
+	 * @param amount amount
 	 */
 	void transfer(String from, String to, BigDecimal amount);
 }

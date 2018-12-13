@@ -13,8 +13,6 @@ import gr.payment.gr.model.TransferEntity;
 import gr.payment.gr.service.AccountService;
 import gr.payment.gr.service.TransferService;
 import gr.payment.gr.utils.DaoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
 
@@ -22,13 +20,20 @@ import java.math.BigDecimal;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import static spark.Spark.*;
+import static spark.Spark.after;
+import static spark.Spark.exception;
+import static spark.Spark.get;
+import static spark.Spark.internalServerError;
+import static spark.Spark.notFound;
+import static spark.Spark.port;
+import static spark.Spark.post;
 
 public class PaymentApp {
 
 	public static void main(String[] args) {
-		// Приложение маленькое, не используем никаких DI контейнеров, все соибраем руками.
+		// instead DI framework
 		AccountRepository accountRepository = new AccountDao(DaoUtil.buildAccountContext());
+		// test data
 		accountRepository.save(new AccountEntity("111", "AAA", new BigDecimal("100")));
 		accountRepository.save(new AccountEntity("222", "BBB", new BigDecimal("200")));
 		Queue<TransferEntity> queue = new ArrayBlockingQueue<>(100000);
@@ -48,6 +53,10 @@ public class PaymentApp {
 			response.body(exception.getMessage());
 			response.status(400);
 		});
+
+		notFound((req, res) -> "\"Not found (code 404)\"");
+
+		internalServerError((req, res) -> "\"Internal server error (code 500) \"");
 
 		after("*", (Request request, Response response) -> response.type("application/json"));
 	}

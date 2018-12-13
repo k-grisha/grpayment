@@ -5,8 +5,10 @@ import gr.payment.gr.model.TransferEntity;
 public interface TransferRepository {
 
 	/**
-	 * @param transferEntity
-	 * @return
+	 * Save transfer
+	 *
+	 * @param transferEntity transfer data
+	 * @return uid of transfer
 	 */
 	String save(TransferEntity transferEntity);
 

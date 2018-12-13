@@ -4,9 +4,13 @@ import java.math.BigDecimal;
 
 public class TransferEntity {
 
+	/** Transfer uid */
 	private String uid;
+	/** Money sender */
 	private String from;
+	/** Money recipient */
 	private String to;
+	/** Amount */
 	private BigDecimal amount;
 
 	public TransferEntity(String from, String to, BigDecimal amount) {

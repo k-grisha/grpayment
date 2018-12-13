@@ -3,11 +3,11 @@ package gr.payment.gr.model;
 import java.math.BigDecimal;
 
 public class AccountEntity {
-	/** Уникальный номер счета */
+	/** Account uid */
 	private String uid;
-	/** Имя владельца */
+	/** Owner name */
 	private String ownerName;
-	/** Текущий баланс */
+	/** Current balance */
 	private BigDecimal balance;
 
 	public AccountEntity(String uid, String ownerName, BigDecimal balance) {

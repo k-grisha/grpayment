@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 
+/**
+ * Transfer service
+ */
 public class TransferService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransferService.class);
 

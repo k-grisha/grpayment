@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * Класс с основной бизнес-логикой
+ * Account service
  */
 public class AccountService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
