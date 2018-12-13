@@ -103,16 +103,14 @@ public class IntegrationTest {
 			pt3.start();
 		}
 
-		TimeUnit.MILLISECONDS.sleep(10000);
+		TimeUnit.MILLISECONDS.sleep(30000);
 
 		AccountDto accountA = get(AccountController.PATH_ACCOUNTS + "111", AccountDto.class);
 		AccountDto accountB = get(AccountController.PATH_ACCOUNTS + "222", AccountDto.class);
 		AccountDto accountC = get(AccountController.PATH_ACCOUNTS + "333", AccountDto.class);
-//		AccountDto accountD = get(AccountController.PATH_ACCOUNTS + "444", AccountDto.class);
 		Assert.assertTrue(accountA.balance.compareTo(new BigDecimal("12500.0")) == 0);
 		Assert.assertTrue(accountB.balance.compareTo(new BigDecimal("10000.0")) == 0);
 		Assert.assertTrue(accountC.balance.compareTo(new BigDecimal("7500.0")) == 0);
-//		Assert.assertTrue(accountD.balance.compareTo(new BigDecimal("7500.0"))==0);
 		System.out.println(accountA);
 
 	}

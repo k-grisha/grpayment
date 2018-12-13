@@ -8,7 +8,7 @@
     java -jar target/gr-payment-1.0-SNAPSHOT.jar 
 
 
-###REST API
+### REST API
 
 **Get all accounts**:
 
