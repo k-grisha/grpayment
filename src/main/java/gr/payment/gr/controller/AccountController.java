@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.payment.gr.dto.AccountDto;
 import gr.payment.gr.dto.TransferDto;
 import gr.payment.gr.model.AccountEntity;
+import gr.payment.gr.model.TransferEntity;
 import gr.payment.gr.service.AccountService;
+import gr.payment.gr.service.TransferService;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -22,9 +24,11 @@ public class AccountController {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	private final AccountService accountService;
+	private final TransferService transferService;
 
-	public AccountController(AccountService accountService) {
+	public AccountController(AccountService accountService, TransferService transferService) {
 		this.accountService = accountService;
+		this.transferService = transferService;
 	}
 
 	public Route getAll() {
@@ -36,11 +40,19 @@ public class AccountController {
 		};
 	}
 
+	public Route create() {
+		return (Request request, Response response) -> {
+			AccountDto accountDto = MAPPER.readValue(request.body(), AccountDto.class);
+			accountService.create(new AccountEntity(accountDto.uid, accountDto.ownerName, accountDto.balance));
+			return MAPPER.writeValueAsString(accountDto);
+		};
+	}
+
 	public Route getByUid() {
 		return (request, response) -> {
 			AccountEntity account = accountService.getByUid(request.params(UID_ACCOUNT));
 			if (account == null) {
-				return null;
+				return MAPPER.writeValueAsString(null);
 			}
 			AccountDto accountDto = new AccountDto(account.getUid(), account.getOwnerName(), account.getBalance());
 			return MAPPER.writeValueAsString(accountDto);
@@ -50,7 +62,7 @@ public class AccountController {
 	public Route transfer() {
 		return (request, response) -> {
 			TransferDto transferDto = MAPPER.readValue(request.body(), TransferDto.class);
-			String transferId = accountService.transfer(transferDto.from, transferDto.to, transferDto.amount);
+			String transferId = transferService.transfer(new TransferEntity(transferDto.from, transferDto.to, transferDto.amount));
 			return MAPPER.writeValueAsString(transferId);
 		};
 	}

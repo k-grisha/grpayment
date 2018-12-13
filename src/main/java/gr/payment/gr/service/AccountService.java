@@ -1,15 +1,11 @@
 package gr.payment.gr.service;
 
 import gr.payment.gr.dao.AccountRepository;
-import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Класс с основной бизнес-логикой
@@ -18,69 +14,35 @@ public class AccountService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
 	private final AccountRepository accountRepository;
 
-	/**
-	 * Мониторы для сегментной синхронизации
-	 */
-	private final Object[] locks = new Object[8];
-
 	public AccountService(AccountRepository accountRepository) {
-		Arrays.setAll(locks, i -> new Object());
 		this.accountRepository = accountRepository;
 	}
 
 	/**
-	 * Перевод денег между аккаунатми
+	 * Get all accounts
 	 *
-	 * @param from   ID от кого перевод
-	 * @param to     ID кому перевод
-	 * @param amount Объем перевода
-	 * @return ID транзакции
-	 */
-	public String transfer(String from, String to, BigDecimal amount) {
-		LOGGER.info("Transfer request. from {} to {} amount {}", from, to, amount);
-		if (amount.compareTo(BigDecimal.ZERO) < 0) {
-			throw new PaymentException("Transfer amount can not be less than zero");
-		}
-		AccountEntity toAccount;
-		//todo монитор только по from череват тем что деньг получателю, пришедшие от разных отправителей, могут быть перезаписаны
-		synchronized (locks[from.hashCode() % locks.length]) {
-			AccountEntity fromAccount = accountRepository.findByUid(from);
-			if (fromAccount == null) {
-				throw new PaymentException("Account with id=" + from + " is not found");
-			}
-			toAccount = accountRepository.findByUid(to);
-			if (toAccount == null) {
-				throw new PaymentException("Account with id=" + to + " is not found");
-			}
-
-			if (fromAccount.getBalance().compareTo(amount) < 0) {
-				throw new PaymentException("Account with id=" + from + " doesn't have enough money");
-			}
-			accountRepository.updateBalance(fromAccount.getUid(), fromAccount.getBalance().subtract(amount));
-		}
-
-		synchronized (locks[to.hashCode() % locks.length]) {
-			// todo транзакционно
-			accountRepository.updateBalance(toAccount.getUid(), toAccount.getBalance().add(amount));
-		}
-		LOGGER.info("Transfer is finished. from {} to {} amount {}", from, to, amount);
-		// todo Сохранить данные таранзакции в соотв. сервисе, желательно асинхронно.
-		return UUID.randomUUID().toString();
-	}
-
-	/**
-	 * Получить все Аккаунты
+	 * @return accounts
 	 */
 	public List<AccountEntity> getAll() {
 		return accountRepository.findAll();
 	}
 
 	/**
-	 * Поиск Аккаунта по номеру
+	 * Get account by uid
+	 *
+	 * @param uid uid
+	 * @return account
 	 */
 	public AccountEntity getByUid(String uid) {
 		return accountRepository.findByUid(uid);
 	}
 
+	/**
+	 * Create/Update account
+	 */
+	public void create(AccountEntity account) {
+		accountRepository.save(account);
+		LOGGER.info("Account with uid=" + account.getUid() + " is created");
+	}
 
 }

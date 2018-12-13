@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS ACCOUNT;
+
+CREATE TABLE ACCOUNT (
+  uid       VARCHAR(50)    NOT NULL,
+  ownerName VARCHAR(400)   NOT NULL,
+  balance   DECIMAL(20, 2) NOT NULL,
+  CONSTRAINT pk_t_account PRIMARY KEY (uid)
+);
+
