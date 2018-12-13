@@ -43,10 +43,20 @@ public class IntegrationTest {
 
 	@Test
 	public void getAccountByUidTest() throws Exception {
-		GetMethod resp = testServer.get(AccountController.PATH_ACCOUNTS + "111", false);
-		HttpResponse execute = testServer.execute(resp);
-		AccountDto accountDto = MAPPER.readValue(execute.body(), AccountDto.class);
+		AccountDto accountDto = get(AccountController.PATH_ACCOUNTS + "111", AccountDto.class);
 		Assert.assertEquals("111", accountDto.uid);
+	}
+
+	@Test
+	public void createAccountTest() throws Exception {
+		AccountDto account = new AccountDto("999", "ZZZ", new BigDecimal("100"));
+		AccountDto accountDto = get(AccountController.PATH_ACCOUNTS + account.uid, AccountDto.class);
+		Assert.assertNull(accountDto);
+		String json = MAPPER.writeValueAsString(account);
+		post(AccountController.PATH_ACCOUNTS, json, AccountDto.class);
+		accountDto = get(AccountController.PATH_ACCOUNTS + account.uid, AccountDto.class);
+		Assert.assertNotNull(accountDto);
+		Assert.assertEquals(account.uid, accountDto.uid);
 	}
 
 	@Test

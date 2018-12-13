@@ -41,6 +41,7 @@ public class PaymentApp {
 		port(8080);
 		post(AccountController.PATH_TRANSFER, accountController.transfer());
 		get(AccountController.PATH_ACCOUNTS, accountController.getAll());
+		post(AccountController.PATH_ACCOUNTS, accountController.create());
 		get(AccountController.PATH_ACCOUNT_UID, accountController.getByUid());
 
 		exception(PaymentException.class, (exception, request, response) -> {

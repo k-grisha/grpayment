@@ -37,5 +37,12 @@ public class AccountService {
 		return accountRepository.findByUid(uid);
 	}
 
+	/**
+	 * Create/Update account
+	 */
+	public void create(AccountEntity account) {
+		accountRepository.save(account);
+		LOGGER.info("Account with uid=" + account.getUid() + " is created");
+	}
 
 }

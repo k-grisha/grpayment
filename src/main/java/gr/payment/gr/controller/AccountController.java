@@ -40,6 +40,14 @@ public class AccountController {
 		};
 	}
 
+	public Route create() {
+		return (Request request, Response response) -> {
+			AccountDto accountDto = MAPPER.readValue(request.body(), AccountDto.class);
+			accountService.create(new AccountEntity(accountDto.uid, accountDto.ownerName, accountDto.balance));
+			return MAPPER.writeValueAsString(accountDto);
+		};
+	}
+
 	public Route getByUid() {
 		return (request, response) -> {
 			AccountEntity account = accountService.getByUid(request.params(UID_ACCOUNT));

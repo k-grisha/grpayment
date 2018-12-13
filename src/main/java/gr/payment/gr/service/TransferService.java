@@ -25,12 +25,10 @@ public class TransferService {
 	/**
 	 * Money Transfer
 	 *
-	 * @param transferEntity
+	 * @param transferEntity Data of transfer
 	 * @return UID of transaction
 	 */
 	public String transfer(TransferEntity transferEntity) {
-		LOGGER.info("Transfer request. from {} to {} amount {}",
-				transferEntity.getFrom(), transferEntity.getTo(), transferEntity.getAmount());
 		if (transferEntity.getAmount().compareTo(BigDecimal.ZERO) < 0) {
 			throw new PaymentException("Transfer amount can not be less than zero");
 		}

@@ -73,4 +73,14 @@ public class AccountDaoTest {
 		accountRepository.transfer("111", "222", new BigDecimal("999.0"));
 	}
 
+	@Test
+	public void create_success() {
+		AccountEntity account = new AccountEntity("999", "ZZZ", new BigDecimal("100"));
+		accountRepository.save(account);
+		AccountEntity createdAccount = accountRepository.findByUid(account.getUid());
+		Assert.assertNotNull(createdAccount);
+		Assert.assertEquals(account.getUid(), createdAccount.getUid());
+		Assert.assertEquals(account.getOwnerName(), createdAccount.getOwnerName());
+	}
+
 }
