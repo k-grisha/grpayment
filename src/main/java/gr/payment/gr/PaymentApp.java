@@ -37,8 +37,7 @@ public class PaymentApp {
 		accountRepository.save(new AccountEntity("111", "AAA", new BigDecimal("100")));
 		accountRepository.save(new AccountEntity("222", "BBB", new BigDecimal("200")));
 		Queue<TransferEntity> queue = new ArrayBlockingQueue<>(100000);
-		TransferRepository transferRepository = new TransferProducer(queue);
-		TransferService transferService = new TransferService(accountRepository, transferRepository);
+		TransferService transferService = new TransferService(accountRepository);
 		AccountService accountService = new AccountService(accountRepository);
 		AccountController accountController = new AccountController(accountService, transferService);
 		new TransferConsumer(queue, accountRepository).start();

@@ -5,8 +5,11 @@ import gr.payment.gr.db.tables.records.AccountRecord;
 import gr.payment.gr.exceprion.PaymentException;
 import gr.payment.gr.model.AccountEntity;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,23 +24,35 @@ public class AccountDao implements AccountRepository {
 	}
 
 	@Override
-	public synchronized void transfer(String from, String to, BigDecimal amount) {
+	public void transfer(String from, String to, BigDecimal amount) {
 		context.transaction(() -> {
-			AccountRecord fromAccount = context.fetchOne(ACCOUNT, ACCOUNT.UID.eq(from));
-			if (fromAccount == null) {
-				throw new PaymentException("Transfer cannot be finished. Account with id=" + from + " is not found");
-			}
-			if (fromAccount.getBalance().compareTo(amount) < 0) {
+			Result<Record> records = context.select()
+					.from(ACCOUNT)
+					.where(ACCOUNT.UID.in(Arrays.asList(from, to)))
+					.forUpdate()
+					.fetch();
+
+			Record fromAccount = records.stream()
+					.filter(r -> r.get(ACCOUNT.UID).equals(from))
+					.findFirst()
+					.orElseThrow(() -> new PaymentException("Transfer cannot be finished. Account with id=" + from + " is not found"));
+			Record toAccount = records.stream()
+					.filter(r -> r.get(ACCOUNT.UID).equals(to))
+					.findFirst()
+					.orElseThrow(() -> new PaymentException("Transfer cannot be finished. Account with id=" + to + " is not found"));
+
+			if (fromAccount.get(ACCOUNT.BALANCE).compareTo(amount) < 0) {
 				throw new PaymentException("Transfer cannot be finished. Account with id=" + from + " doesn't have enough money");
 			}
-			fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
-			fromAccount.store();
-			AccountRecord toAccount = context.fetchOne(ACCOUNT, ACCOUNT.UID.eq(to));
-			if (toAccount == null) {
-				throw new PaymentException("Transfer cannot be finished. Account with id=" + to + " is not found");
-			}
-			toAccount.setBalance(toAccount.getBalance().add(amount));
-			toAccount.store();
+
+			context.batch(
+					context.update(ACCOUNT)
+							.set(ACCOUNT.BALANCE, fromAccount.get(ACCOUNT.BALANCE).subtract(amount))
+							.where(ACCOUNT.UID.eq(from)),
+					context.update(ACCOUNT)
+							.set(ACCOUNT.BALANCE, toAccount.get(ACCOUNT.BALANCE).add(amount))
+							.where(ACCOUNT.UID.eq(to))
+			).execute();
 		});
 	}
 
